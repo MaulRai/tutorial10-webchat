@@ -6,6 +6,29 @@ use yew_agent::{Bridge, Bridged};
 use crate::services::event_bus::EventBus;
 use crate::{services::websocket::WebsocketService, User};
 
+fn is_single_emoji(text: &str) -> bool {
+    let trimmed = text.trim();
+    let char_count = trimmed.chars().count();
+    
+    // Check if it's a single character and likely an emoji
+    if char_count == 1 {
+        let ch = trimmed.chars().next().unwrap();
+        let code = ch as u32;
+        // Common emoji ranges
+        (code >= 0x1F600 && code <= 0x1F64F) || // Emoticons
+        (code >= 0x1F300 && code <= 0x1F5FF) || // Misc Symbols
+        (code >= 0x1F680 && code <= 0x1F6FF) || // Transport
+        (code >= 0x1F700 && code <= 0x1F77F) || // Alchemical Symbols
+        (code >= 0x2600 && code <= 0x26FF) ||   // Misc symbols
+        (code >= 0x2700 && code <= 0x27BF) ||   // Dingbats
+        (code >= 0xFE00 && code <= 0xFE0F) ||   // Variation Selectors
+        (code >= 0x1F900 && code <= 0x1F9FF) || // Supplemental Symbols
+        (code >= 0x1F018 && code <= 0x1F270)    // Various symbols
+    } else {
+        false
+    }
+}
+
 pub enum Msg {
     HandleMsg(String),
     SubmitMessage,
@@ -199,6 +222,8 @@ impl Component for Chat {
                                             <div class="text-gray-700">
                                                 if m.message.ends_with(".gif") {
                                                     <img class="mt-2 rounded-lg max-w-xs shadow-sm" src={m.message.clone()}/>
+                                                } else if is_single_emoji(&m.message) {
+                                                    <p class="text-6xl leading-relaxed">{m.message.clone()}</p>
                                                 } else {
                                                     <p class="leading-relaxed">{m.message.clone()}</p>
                                                 }
